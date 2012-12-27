@@ -1,0 +1,25 @@
+[DEFAULT]
+devices = /srv/<%= @storage_no %>/node
+mount_check = false
+disable_fallocate = true
+bind_port = <%= @bind_port %>
+user = <%= @user %>
+log_facility = <%= @log_facility %>
+recon_cache_path = /var/cache/swift<%= @cache_no %>
+eventlet_debug = true
+
+[pipeline:main]
+pipeline = recon object-server
+
+[app:object-server]
+use = egg:swift#object
+
+[filter:recon]
+use = egg:swift#recon
+
+[object-replicator]
+vm_test_mode = yes
+
+[object-updater]
+
+[object-auditor]

@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: SAIO
+# Cookbook Name:: saio_pkg
 # Recipe:: default
 #
 # Copyright 2012, YOUR_COMPANY_NAME

@@ -1,0 +1,55 @@
+[DEFAULT]
+bind_port = 8080
+user = <%= @user %>
+log_facility = LOG_LOCAL1
+eventlet_debug = true
+workers = 4
+
+[pipeline:main]
+#tempauth
+pipeline = healthcheck cache swift3 tempurl tempauth proxy-logging proxy-server
+
+
+[app:proxy-server]
+use = egg:swift#proxy
+allow_account_management = true
+account_autocreate = true
+
+[filter:tempauth]
+use = egg:swift#tempauth
+user_admin_admin = admin .admin .reseller_admin
+user_test_tester = testing .admin
+user_test2_tester2 = testing2 .admin
+user_test_tester3 = testing3
+
+[filter:healthcheck]
+use = egg:swift#healthcheck
+
+[filter:cache]
+use = egg:swift#memcache
+memcache_servers = <%= @memcached_ips %>
+
+[filter:proxy-logging]
+use = egg:swift#proxy_logging
+
+[filter:swift3]
+paste.filter_factory = swift3.middleware:filter_factory
+
+# Note: Put staticweb just after your auth filter(s) in the pipeline
+[filter:staticweb]
+use = egg:swift#staticweb
+# Seconds to cache container x-container-meta-web-* header values.
+cache_timeout = 300
+# You can override the default log routing for this filter here:
+set log_name = staticweb
+set log_facility = LOG_LOCAL1
+set log_level = DEBUG
+# set log_address = /dev/log
+set access_log_name = staticweb
+set access_log_facility = LOG_LOCAL1
+set access_log_level = INFO
+set log_headers = True
+
+# Note: Put tempurl just before your auth filter(s) in the pipeline
+[filter:tempurl]
+use = egg:swift#tempurl
