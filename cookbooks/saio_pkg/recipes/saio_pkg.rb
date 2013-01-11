@@ -1,7 +1,54 @@
 #
-# Cookbook Name:: saio
+# Cookbook Name:: saio_pkg
 # Recipe:: saio_pkg
 #
+
+%w{apt-file ubuntu-cloud-keyring curl gcc git-core memcached }.each do |pkg|
+  package pkg do
+    action :install
+#    options "--force-yes"
+  end
+end
+
+%w{python-software-properties python-coverage python-dev python-nose python-setuptools python-simplejson python-xattr sqlite3 xfsprogs python-eventlet python-greenlet python-pastedeploy python-netifaces python-pip}.each do |pkg|
+  package pkg do
+    action :install
+  end
+end
+
+execute "cloudarchive-add" do
+  command "add-apt-repository 'deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main' && apt-get update && touch /var/lib/apt/added_cloud_archive"
+  user "root"
+  creates "/var/lib/apt/added_cloud_archive"
+end
+
+package "swift" do
+  action :install
+  version "1.7.4-0ubuntu2~cloud0"
+end
+
+package "python-swiftclient" do
+  action :install
+  version "1:1.2.0-0ubuntu2~cloud0"
+end
+
+package "swift-proxy" do
+  action :install
+  version "1.7.4-0ubuntu2~cloud0"
+end
+
+package "swift-plugin-s3" do
+  action :install
+end
+
+
+%w{swift swift-account swift-container swift-object}.each do |pkg|
+  package pkg do
+    action :install
+    version "1.7.4-0ubuntu2~cloud0"
+  end
+end
+
 
 disk = node[:swift][:disk]
 mnt_dir = "/mnt/#{disk}"
@@ -59,12 +106,14 @@ end
     action :create
   end
 end
+
 directory "/var/log/swift" do
   owner "syslog"
   group "adm"
   mode 0775
   action :create
 end
+
 directory "/var/log/swift/hourly" do
   owner "syslog"
   group "adm"
@@ -76,53 +125,6 @@ execute "update rsyslog.conf" do
   command "sed 's/$PrivDropToGroup syslog/$PrivDropToGroup adm/g' </etc/rsyslog.conf > /tmp/rsyslog.conf;cp /tmp/rsyslog.conf /etc/"
 end
 
-
-
-%w{apt-file ubuntu-cloud-keyring curl gcc git-core memcached }.each do |pkg|
-  package pkg do
-    action :install
-#    options "--force-yes"
-  end
-end
-
-%w{python-software-properties python-coverage python-dev python-nose python-setuptools python-simplejson python-xattr sqlite3 xfsprogs python-eventlet python-greenlet python-pastedeploy python-netifaces python-pip}.each do |pkg|
-  package pkg do
-    action :install
-  end
-end
-
-execute "cloudarchive-add" do
-  command "add-apt-repository 'deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main' && apt-get update && touch /var/lib/apt/added_cloud_archive"
-  user "root"
-  creates "/var/lib/apt/added_cloud_archive"
-end
-
-package "swift" do
-  action :install
-  version "1.7.4-0ubuntu2~cloud0"
-end
-
-package "python-swiftclient" do
-  action :install
-  version "1:1.2.0-0ubuntu2~cloud0"
-end
-
-package "swift-proxy" do
-  action :install
-  version "1.7.4-0ubuntu2~cloud0"
-end
-
-package "swift-plugin-s3" do
-  action :install
-end
-
-
-%w{swift swift-account swift-container swift-object}.each do |pkg|
-  package pkg do
-    action :install
-    version "1.7.4-0ubuntu2~cloud0"
-  end
-end
 
 template "/etc/rsyncd.conf" do
   source "rsyncd.conf.erb"
