@@ -267,3 +267,10 @@ type2port_base = {
     end
   end
 end
+
+%w{account container object}.each do |type|
+  file "/etc/swift/#{type}-server.conf" do
+    action :delete
+  end
+end
+
