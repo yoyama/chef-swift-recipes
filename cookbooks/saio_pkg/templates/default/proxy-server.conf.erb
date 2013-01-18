@@ -7,7 +7,7 @@ workers = 4
 
 [pipeline:main]
 #tempauth
-pipeline = healthcheck cache swift3 tempurl tempauth proxy-logging proxy-server
+pipeline = healthcheck cache swift3 tempurl tempauth staticweb proxy-logging proxy-server
 
 
 [app:proxy-server]
