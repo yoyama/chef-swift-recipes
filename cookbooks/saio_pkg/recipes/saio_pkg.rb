@@ -53,6 +53,12 @@ end
   end
 end
 
+directory "/srv" do
+  owner "root"
+  group "root"
+  action :create
+end
+
 use_loopdevice = node[:swift][:loopdevice]
 if use_loopdevice
   include_recipe "saio_pkg::saio_loopdevice"
@@ -60,12 +66,6 @@ end
   
 disk = node[:swift][:disk]
 mnt_dir = "/mnt/#{disk}"
-
-directory "/srv" do
-  owner "root"
-  group "root"
-  action :create
-end
 
 for i in 1..4 do
   if i == 1
@@ -251,7 +251,7 @@ type2port_base = {
 %w{account container object}.each do |type|
   builder_file = "/etc/swift/#{type}.builder"
   if !FileTest.exists?(builder_file)
-    execute "create" do
+    execute "create ring file for #{type}" do
       command "swift-ring-builder #{type}.builder create 18 3 1"
       cwd "/etc/swift"
       user node[:swift][:user]
@@ -260,14 +260,14 @@ type2port_base = {
     port_base = type2port_base[type]
     for i in 1..4 do
       port = port_base + i*10
-      execute "add" do
+      execute "add device z#{i} for #{type}" do
         command "swift-ring-builder #{type}.builder add z#{i}-127.0.0.1:#{port}/sdb#{i} 1"
         cwd "/etc/swift"
         user node[:swift][:user]
         group node[:swift][:group]
       end
     end
-    execute "rebalance" do
+    execute "rebalance #{type}" do
       command "swift-ring-builder #{type}.builder rebalance"
       cwd "/etc/swift"
       user node[:swift][:user]

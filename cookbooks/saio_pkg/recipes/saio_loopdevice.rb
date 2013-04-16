@@ -15,7 +15,7 @@ directory "#{mnt_dir}" do
 end
 
 if !FileTest.exists?(disk_file)
-  execute "create" do
+  execute "prepare diskfile" do
     command "truncate -s 1GB #{disk_file}"
     cwd "/srv"
   end
