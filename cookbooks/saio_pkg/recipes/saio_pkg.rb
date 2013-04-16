@@ -16,25 +16,29 @@ end
   end
 end
 
+cloudarchive_repo = node[:swift][:cloudarchive_repo]
+swift_pkg_version = node[:swift][:pkg_version]
+client_pkg_version = node[:swift][:client_pkg_version]
+
 execute "cloudarchive-add" do
-  command "add-apt-repository 'deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main' && apt-get update && touch /var/lib/apt/added_cloud_archive"
+  command "add-apt-repository 'deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/#{cloudarchive_repo} main' && apt-get update && touch /var/lib/apt/added_cloud_archive"
   user "root"
   creates "/var/lib/apt/added_cloud_archive"
 end
 
 package "swift" do
   action :install
-  version "1.7.4-0ubuntu2~cloud0"
+  version "#{swift_pkg_version}"
 end
 
 package "python-swiftclient" do
   action :install
-  version "1:1.2.0-0ubuntu2~cloud0"
+  version "#{client_pkg_version}"
 end
 
 package "swift-proxy" do
   action :install
-  version "1.7.4-0ubuntu2~cloud0"
+  version "#{swift_pkg_version}"
 end
 
 package "swift-plugin-s3" do
@@ -42,14 +46,18 @@ package "swift-plugin-s3" do
 end
 
 
-%w{swift swift-account swift-container swift-object}.each do |pkg|
+%w{swift-account swift-container swift-object}.each do |pkg|
   package pkg do
     action :install
-    version "1.7.4-0ubuntu2~cloud0"
+    version  "#{swift_pkg_version}"
   end
 end
 
-
+use_loopdevice = node[:swift][:loopdevice]
+if use_loopdevice
+  include_recipe "saio_pkg::saio_loopdevice"
+end
+  
 disk = node[:swift][:disk]
 mnt_dir = "/mnt/#{disk}"
 
@@ -274,3 +282,14 @@ end
   end
 end
 
+execute "restart rsync" do
+  command "service rsync restart"
+  user "root"
+  group "root"
+end
+
+execute "restart memcached" do
+  command "service memcached restart"
+  user "root"
+  group "root"
+end
