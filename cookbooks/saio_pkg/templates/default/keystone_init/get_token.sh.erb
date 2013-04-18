@@ -1,0 +1,6 @@
+#!/bin/sh
+
+curl -k -d '{"auth":{"passwordCredentials":{"username":"admin", "password":"<%=@admin_user_pass%>"},"tenantName":"demo"}}' \
+  -H "Content-type: application/json" \
+  https://<%=@auth_host_external%>/v2.0/tokens|python -mjson.tool
+

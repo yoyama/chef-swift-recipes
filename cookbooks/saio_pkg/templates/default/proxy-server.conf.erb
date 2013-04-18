@@ -6,14 +6,35 @@ eventlet_debug = true
 workers = 4
 
 [pipeline:main]
+#keystone
+pipeline = catch_errors healthcheck proxy-logging cache swift3 s3token tempurl authtoken keystone proxy-server
+
 #tempauth
-pipeline = healthcheck cache swift3 tempurl tempauth staticweb proxy-logging proxy-server
+#pipeline = healthcheck cache swift3 tempurl tempauth staticweb proxy-logging proxy-server
 
 
 [app:proxy-server]
 use = egg:swift#proxy
 allow_account_management = true
 account_autocreate = true
+
+[filter:keystone]
+paste.filter_factory = keystone.middleware.swift_auth:filter_factory
+operator_roles = admin, swiftoperator, Member
+
+[filter:authtoken]
+paste.filter_factory = keystone.middleware.auth_token:filter_factory
+# Delaying the auth decision is required to support token-less
+# usage for anonymous referrers ('.r:*').
+delay_auth_decision = 1
+service_port = 5000
+service_host = <%=@ks_auth_host_internal%>
+auth_port = 35357
+auth_protocol = http
+auth_host = <%= @ks_auth_host_internal%>
+auth_token = <%= @ks_admin_token%>
+admin_token = <%= @ks_admin_token%>
+signing_dir = /var/lib/swift/keystone-signing
 
 [filter:tempauth]
 use = egg:swift#tempauth

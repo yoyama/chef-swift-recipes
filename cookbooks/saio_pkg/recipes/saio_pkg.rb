@@ -129,6 +129,13 @@ directory "/var/log/swift/hourly" do
   action :create
 end
 
+directory "/var/lib/swift/keystone-signing" do
+  owner node[:swift][:user]
+  group node[:swift][:group]
+  mode 0775
+  action :create
+end
+
 execute "update rsyslog.conf" do
   command "sed 's/$PrivDropToGroup syslog/$PrivDropToGroup adm/g' </etc/rsyslog.conf > /tmp/rsyslog.conf;cp /tmp/rsyslog.conf /etc/"
 end
@@ -173,7 +180,9 @@ template "/etc/swift/proxy-server.conf" do
                :user => node[:swift][:user],
                :proxy_host => node[:swift][:proxy_host],
                :log_level => node[:swift][:log_level],
-               :memcached_ips => node[:swift][:memcached_ips]
+               :memcached_ips => node[:swift][:memcached_ips],
+               :ks_auth_host_internal => node[:keystone][:ks_auth_host_internal],
+               :ks_admin_token => node[:keystone][:ks_admin_token]
              })
 end
 

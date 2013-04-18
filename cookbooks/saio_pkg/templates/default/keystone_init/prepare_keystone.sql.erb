@@ -1,0 +1,4 @@
+CREATE DATABASE keystone;
+GRANT ALL ON keystone.* TO 'keystone'@'%' IDENTIFIED BY '<%=@ks_mysql_pass%>';
+GRANT ALL ON keystone.* TO 'keystone'@'localhost' IDENTIFIED BY '<%=@ks_mysql_pass%>';
+

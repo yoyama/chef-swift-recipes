@@ -1,0 +1,8 @@
+#!/bin/sh
+
+mysql -u root < set_rootpasswd.sql
+mysql -u root -p<%=@ks_mysql_pass%> < prepare_keystone.sql
+sudo service keystone restart
+sudo keystone-manage db_sync
+
+
