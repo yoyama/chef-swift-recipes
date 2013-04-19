@@ -10,6 +10,8 @@ default[:swift][:cloudarchive_repo] = "grizzly"
 default[:swift][:pkg_version] = "1.8.0-0ubuntu1~cloud0"
 default[:swift][:client_pkg_version] = "1:1.3.0-0ubuntu1~cloud0"
 
+default[:keystone][:pkg_version] = "1:2013.1-0ubuntu1~cloud0"
+default[:keystone][:client_pkg_version] = "1:0.2.3-0ubuntu1~cloud0"
 default[:keystone][:ks_auth_host_internal] = 'localhost'
 default[:keystone][:ks_auth_host_external] = 'localhost'
 default[:keystone][:ks_admin_token] = 'OpenStack'

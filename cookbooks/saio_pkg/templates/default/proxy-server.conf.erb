@@ -19,6 +19,7 @@ allow_account_management = true
 account_autocreate = true
 
 [filter:keystone]
+use = egg:swift#keystoneauth
 paste.filter_factory = keystone.middleware.swift_auth:filter_factory
 operator_roles = admin, swiftoperator, Member
 
@@ -50,11 +51,11 @@ use = egg:swift#healthcheck
 use = egg:swift#memcache
 memcache_servers = <%= @memcached_ips %>
 
-[filter:proxy-logging]
-use = egg:swift#proxy_logging
-
 [filter:swift3]
 paste.filter_factory = swift3.middleware:filter_factory
+
+[filter:catch_errors]
+use = egg:swift#catch_errors
 
 # Note: Put staticweb just after your auth filter(s) in the pipeline
 [filter:staticweb]
@@ -74,3 +75,14 @@ set log_headers = True
 # Note: Put tempurl just before your auth filter(s) in the pipeline
 [filter:tempurl]
 use = egg:swift#tempurl
+
+[filter:s3token]
+paste.filter_factory = keystone.middleware.s3_token:filter_factory
+# uncomment the following line if you don't want to use SSL
+auth_protocol = http
+auth_port = 35357
+auth_host = <%=@ks_auth_host_internal%>
+
+[filter:proxy-logging]
+use = egg:swift#proxy_logging
+

@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: saio_pkg
-# Recipe:: keystone
+# Recipe:: swift_keystone
 #
 
 package "mysql-server" do
@@ -14,14 +14,17 @@ end
   end
 end
 
+ks_pkg_version = node[:keystone][:pkg_version]
+ks_client_pkg_version = node[:keystone][:client_pkg_version]
+
 package "keystone" do
   action :install
-  version "2012.2.1-0ubuntu1.3~cloud0"
+  version "#{ks_pkg_version}"
 end
 
 package "python-keystoneclient" do
   action :install
-  version "1:0.1.3-0ubuntu1.1~cloud0"
+  version "#{ks_client_pkg_version}"
 end
 
 %w{memcached python-memcache}.each do |pkg|
@@ -60,7 +63,7 @@ service "memcached" do
    action [:enable]
 end
 
-keystone_init_dir="/tmp/keystone_init"
+keystone_init_dir="/root/keystone_init"
 directory "#{keystone_init_dir}" do
   group "root"
   owner "root"

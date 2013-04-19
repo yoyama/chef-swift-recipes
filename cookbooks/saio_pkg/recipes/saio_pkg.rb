@@ -133,6 +133,7 @@ directory "/var/lib/swift/keystone-signing" do
   owner node[:swift][:user]
   group node[:swift][:group]
   mode 0775
+  recursive true
   action :create
 end
 
