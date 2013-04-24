@@ -7,7 +7,7 @@ workers = 4
 
 [pipeline:main]
 #tempauth
-pipeline = healthcheck cache swift3 tempurl tempauth staticweb proxy-logging proxy-server
+pipeline = healthcheck proxy-logging cache slo swift3 tempurl tempauth container-quotas account-quotas staticweb proxy-logging proxy-server
 
 
 [app:proxy-server]
@@ -53,3 +53,18 @@ set log_headers = True
 # Note: Put tempurl just before your auth filter(s) in the pipeline
 [filter:tempurl]
 use = egg:swift#tempurl
+
+# Note: Put after auth in the pipeline.
+[filter:container-quotas]
+use = egg:swift#container_quotas
+
+# Note: Put before both ratelimit and auth in the pipeline.
+[filter:slo]
+use = egg:swift#slo
+# max_manifest_segments = 1000
+# max_manifest_size = 2097152
+# min_segment_size = 1048576
+
+[filter:account-quotas]
+use = egg:swift#account_quotas
+
