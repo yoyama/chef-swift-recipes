@@ -2,6 +2,7 @@
 # Cookbook Name:: saio_pkg
 # Recipe:: saio_pkg
 #
+include_recipe "python::pip"
 
 %w{apt-file ubuntu-cloud-keyring curl gcc git-core memcached }.each do |pkg|
   package pkg do
@@ -14,6 +15,11 @@ end
   package pkg do
     action :install
   end
+end
+
+python_pip "dnspython" do
+  version "1.11.0"
+  action :install
 end
 
 cloudarchive_repo = node[:swift][:cloudarchive_repo]
