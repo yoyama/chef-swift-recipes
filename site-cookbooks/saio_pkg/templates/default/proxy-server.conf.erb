@@ -7,7 +7,7 @@ workers = 4
 
 [pipeline:main]
 #keystone
-pipeline = catch_errors healthcheck proxy-logging cache slo swift3 s3token tempurl authtoken keystone container-quotas account-quotas staticweb proxy-logging proxy-server
+pipeline = catch_errors healthcheck proxy-logging cache slo swift3 s3token tempurl authtoken keystone container-quotas account-quotas staticweb proxy-logging ceilometer proxy-server
 
 #tempauth
 #pipeline = healthcheck proxy-logging cache slo swift3 tempurl tempauth container-quotas account-quotas staticweb proxy-logging proxy-server
@@ -100,3 +100,9 @@ use = egg:swift#slo
 
 [filter:account-quotas]
 use = egg:swift#account_quotas
+
+[filter:ceilometer]
+use = egg:ceilometer#swift
+# Some optional configuration
+# this allow to publish additional metadata
+metadata_headers = X-TEST

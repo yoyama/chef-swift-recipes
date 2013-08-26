@@ -268,7 +268,7 @@ type2port_base = {
   builder_file = "/etc/swift/#{type}.builder"
   if !FileTest.exists?(builder_file)
     execute "create ring file for #{type}" do
-      command "swift-ring-builder #{type}.builder create 18 3 1"
+      command "swift-ring-builder #{type}.builder create 12 3 1"
       cwd "/etc/swift"
       user node[:swift][:user]
       group node[:swift][:group]
@@ -306,6 +306,12 @@ end
 
 execute "restart memcached" do
   command "service memcached restart"
+  user "root"
+  group "root"
+end
+
+execute "restart rsyslog" do
+  command "service rsyslog restart"
   user "root"
   group "root"
 end

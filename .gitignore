@@ -1,3 +1,7 @@
 /cookbooks
+/nodes/*json
+!/nodes/localhost.json
+/Cheffile.lock
 /tmp
 *.bak
+*~

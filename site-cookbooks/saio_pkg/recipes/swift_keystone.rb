@@ -71,7 +71,8 @@ directory "#{keystone_init_dir}" do
   action :create
 end
 
-%w{get_token.sh init_data.sh init_keystonedb.sh prepare_keystone.sql set_rootpasswd.sql .keystone_rc}.each do |pkg|
+#%w{get_token.sh init_data.sh init_keystonedb.sh prepare_keystone.sql set_rootpasswd.sql .keystone_rc}.each do |pkg|
+%w{get_token.sh init_data.sh .keystone_rc}.each do |pkg|
   template "#{keystone_init_dir}/#{pkg}" do
     source "keystone_init/#{pkg}.erb"
     mode "0700"
@@ -79,6 +80,7 @@ end
     group "root"
     variables( {
                :swift_proxy_host => node[:swift][:proxy_host],
+               :cm_api_host => node[:ceilometer][:cm_api_host],
                :ks_auth_host_external => node[:keystone][:ks_auth_host_external],
                :ks_admin_user_pass => node[:keystone][:ks_admin_user_pass],
                :ks_service_user_pass => node[:keystone][:ks_service_user_pass],
@@ -88,3 +90,43 @@ end
   end
 
 end
+
+include_recipe 'database::mysql'
+
+mysql_connection_info = {
+  :host => "localhost",
+  :username => 'root',
+  :password => node['mysql']['server_root_password']
+}
+
+mysql_database "keystone" do
+  connection mysql_connection_info
+  action :create
+end
+
+mysql_database_user "keystone" do
+  connection mysql_connection_info
+  password node[:keystone][:ks_mysql_pass]
+  database_name "keystone"
+  privileges [:all]
+  action [:create, :grant]
+end
+
+bash "init_keystone" do
+  user "root"
+  cwd "/root/keystone_init"
+  code <<-EOF
+service keystone restart
+keystone-manage db_sync
+  EOF
+end
+
+bash "install_keystone_data" do
+  user "root"
+  cwd "/root/keystone_init"
+  code <<-EOF
+./init_data.sh
+  EOF
+  not_if '. /root/keystone_init/.keystone_rc && keystone tenant-list | grep service'
+end
+

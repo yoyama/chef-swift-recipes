@@ -1,3 +1,8 @@
 {
-"run_list" : [ "recipe[python]", "recipe[saio_pkg::saio_pkg]", "recipe[saio_pkg::swift_keystone]" ]
+	"run_list" : [ 
+		   "recipe[mysql::server]", "recipe[python]", 
+		   "recipe[saio_pkg::swift_keystone]", 
+		   "recipe[saio_pkg::ceilometer]",
+		   "recipe[saio_pkg::saio_pkg]"
+	]
 }

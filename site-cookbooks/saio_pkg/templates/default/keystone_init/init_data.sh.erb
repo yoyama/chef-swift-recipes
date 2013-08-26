@@ -6,6 +6,7 @@ CONTROLLER_INTERNAL_ADDRESS=<%=@ks_auth_host_external%>
 SWIFT_ADDRESS=<%=@swift_proxy_host%>
 ADMIN_USER_PASSWORD=<%=@ks_admin_user_pass%>
 SERVICE_USER_PASSWORD=<%=@ks_service_user_pass%>
+CEILOMETER_ADDRESS=<%=@cm_api_host%>
 
 # Copyright 2013 OpenStack LLC
 #
@@ -93,6 +94,8 @@ ADMIN_USER=$(get_id keystone user-create --name=admin \
                                          --pass=$ADMIN_USER_PASSWORD)
 
 ADMIN_ROLE=$(get_id keystone role-create --name=admin)
+MEMBER_ROLE=$(get_id keystone role-create --name=Member)
+RESELLER_ADMIN_ROLE=$(get_id keystone role-create --name=ResellerAdmin)
 
 keystone user-role-add --user-id $ADMIN_USER \
                        --role-id $ADMIN_ROLE \
@@ -133,6 +136,18 @@ SWIFT_USER=$(get_id keystone user-create --name=swift \
 
 keystone user-role-add --user-id $SWIFT_USER \
                        --role-id $ADMIN_ROLE \
+                       --tenant-id $SERVICE_TENANT
+
+CEILOMETER_USER=$(get_id keystone user-create --name=ceilometer \
+                                         --pass=$SERVICE_USER_PASSWORD \
+                                         --tenant-id $SERVICE_TENANT)
+
+keystone user-role-add --user-id $CEILOMETER_USER \
+                       --role-id $ADMIN_ROLE \
+                       --tenant-id $SERVICE_TENANT
+
+keystone user-role-add --user-id $CEILOMETER_USER \
+                       --role-id $RESELLER_ADMIN_ROLE \
                        --tenant-id $SERVICE_TENANT
 
 #
@@ -223,6 +238,32 @@ fi
 RESULT=$(keystone ec2-credentials-create --tenant-id=$SERVICE_TENANT --user-id=$ADMIN_USER)
 ADMIN_ACCESS=`echo "$RESULT" | grep access | awk '{print $4}'`
 ADMIN_SECRET=`echo "$RESULT" | grep secret | awk '{print $4}'`
+
+
+#
+# Ceilometer service
+#
+CEILOMETER_SERVICE=$(get_id \
+keystone service-create --name=ceilometer \
+                        --type="metering" \
+                        --description="Ceilometer Service")
+if [[ -z "$DISABLE_ENDPOINTS" ]]; then
+    keystone endpoint-create --region RegionOne --service-id $CEILOMETER_SERVICE \
+        --publicurl   "http://$CEILOMETER_ADDRESS:8777/" \
+        --adminurl    "http://$CEILOMETER_ADDRESS:8777/" \
+        --internalurl "http://$CEILOMETER_ADDRESS:8777/"
+fi
+
+
+
+
+
+
+# create ec2 creds and parse the secret and access key returned
+RESULT=$(keystone ec2-credentials-create --tenant-id=$SERVICE_TENANT --user-id=$ADMIN_USER)
+ADMIN_ACCESS=`echo "$RESULT" | grep access | awk '{print $4}'`
+ADMIN_SECRET=`echo "$RESULT" | grep secret | awk '{print $4}'`
+
 
 # write the secret and access to ec2rc
 cat > $EC2RC <<EOF
