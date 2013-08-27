@@ -22,7 +22,7 @@ If you want to customize, please check site-cookbooks/saio_pkg/attributes/defaul
 ### How to use
 
     sudo cp /root/openstack_rc ~/
-    . ./openstack_rc
+    . ~/openstack_rc
     swift stat -v
     ceilometer meter-list
 
