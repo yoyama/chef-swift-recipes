@@ -30,7 +30,7 @@ end
 
 
 execute "restart swift" do
-  command "/usr/bin/swift-init all restart"
+  command "/usr/bin/swift-init all restart || /usr/bin/swift-init all restart"
   user "root"
 end
 
@@ -45,3 +45,19 @@ end
     user "root"
   end
 end
+
+ks_auth_host_external = node[:keystone][:ks_auth_host_external]
+
+template "/root/openstack_rc" do
+  source "openstack_rc.erb"
+  mode "0644"
+  owner "root"
+  group "root"
+  variables( {
+              :user => "admin",
+              :tenant => "demo",
+              :password => node[:keystone][:ks_admin_user_pass],
+              :auth_url => "http://#{ks_auth_host_external}:5000/v2.0"
+            } )
+end
+
