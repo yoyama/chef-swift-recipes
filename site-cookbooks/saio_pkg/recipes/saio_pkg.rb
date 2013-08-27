@@ -298,20 +298,3 @@ end
   end
 end
 
-execute "restart rsync" do
-  command "service rsync restart"
-  user "root"
-  group "root"
-end
-
-execute "restart memcached" do
-  command "service memcached restart"
-  user "root"
-  group "root"
-end
-
-execute "restart rsyslog" do
-  command "service rsyslog restart"
-  user "root"
-  group "root"
-end
