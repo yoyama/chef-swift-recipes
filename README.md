@@ -2,7 +2,7 @@
 
 ## cookbooks/saio_pkg
 
-OpenStack Swift All in One with folsom packages from CloudArchive for Ubuntu 12.04. 
+OpenStack Swift All in One with pre-Havana packages from CloudArchive for Ubuntu 12.04. 
 You can install Swift, Keystone, Ceilometer in one server.
 
 ### How to install
