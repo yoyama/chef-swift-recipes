@@ -80,14 +80,14 @@ cm_client_pkg_version = node[:ceilometer][:client_pkg_version]
 %w{python-ceilometer ceilometer-common ceilometer-collector ceilometer-api ceilometer-agent-compute ceilometer-agent-central  }.each do |pkg|
   package pkg do
     action :install
-    version "#{cm_pkg_version}"
+#    version "#{cm_pkg_version}"
     options "-o Dpkg::Options::=\"--force-confold\" --force-yes "
   end
 end
 
 package "python-ceilometerclient" do
   action :install
-  version "#{cm_client_pkg_version}"
+#  version "#{cm_client_pkg_version}"
 end
 
 execute "restart rabbitmq-server" do

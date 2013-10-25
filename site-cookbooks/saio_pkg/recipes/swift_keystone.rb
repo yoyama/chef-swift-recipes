@@ -19,12 +19,12 @@ ks_client_pkg_version = node[:keystone][:client_pkg_version]
 
 package "keystone" do
   action :install
-  version "#{ks_pkg_version}"
+#  version "#{ks_pkg_version}"
 end
 
 package "python-keystoneclient" do
   action :install
-  version "#{ks_client_pkg_version}"
+#  version "#{ks_client_pkg_version}"
 end
 
 %w{memcached python-memcache}.each do |pkg|

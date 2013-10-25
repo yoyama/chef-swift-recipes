@@ -34,17 +34,17 @@ end
 
 package "swift" do
   action :install
-  version "#{swift_pkg_version}"
+#  version "#{swift_pkg_version}"
 end
 
 package "python-swiftclient" do
   action :install
-  version "#{client_pkg_version}"
+#  version "#{client_pkg_version}"
 end
 
 package "swift-proxy" do
   action :install
-  version "#{swift_pkg_version}"
+#  version "#{swift_pkg_version}"
 end
 
 package "swift-plugin-s3" do
@@ -55,7 +55,7 @@ end
 %w{swift-account swift-container swift-object}.each do |pkg|
   package pkg do
     action :install
-    version  "#{swift_pkg_version}"
+#    version  "#{swift_pkg_version}"
   end
 end
 
