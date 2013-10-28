@@ -7,7 +7,7 @@ workers = 4
 
 [pipeline:main]
 #keystone
-pipeline = catch_errors healthcheck proxy-logging cache slo swift3 s3token tempurl authtoken keystone container-quotas account-quotas staticweb proxy-logging ceilometer proxy-server
+pipeline = catch_errors healthcheck proxy-logging cache slo tempurl authtoken keystone container-quotas account-quotas staticweb proxy-logging ceilometer proxy-server
 
 #tempauth
 #pipeline = healthcheck proxy-logging cache slo swift3 tempurl tempauth container-quotas account-quotas staticweb proxy-logging proxy-server
@@ -21,7 +21,7 @@ account_autocreate = true
 
 [filter:keystone]
 use = egg:swift#keystoneauth
-paste.filter_factory = keystone.middleware.swift_auth:filter_factory
+paste.filter_factory = keystoneclient.middleware.swift_auth:filter_factory
 operator_roles = admin, swiftoperator, Member
 
 [filter:authtoken]
