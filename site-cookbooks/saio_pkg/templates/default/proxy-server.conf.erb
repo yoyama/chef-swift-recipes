@@ -7,7 +7,7 @@ workers = 4
 
 [pipeline:main]
 #keystone
-pipeline = catch_errors healthcheck proxy-logging cache slo tempurl authtoken keystone container-quotas account-quotas staticweb proxy-logging ceilometer proxy-server
+pipeline = catch_errors healthcheck proxy-logging cache slo tempurl authtoken keystoneauth container-quotas account-quotas staticweb proxy-logging ceilometer proxy-server
 
 #tempauth
 #pipeline = healthcheck proxy-logging cache slo swift3 tempurl tempauth container-quotas account-quotas staticweb proxy-logging proxy-server
@@ -19,16 +19,15 @@ use = egg:swift#proxy
 allow_account_management = true
 account_autocreate = true
 
-[filter:keystone]
+[filter:keystoneauth]
 use = egg:swift#keystoneauth
-paste.filter_factory = keystoneclient.middleware.swift_auth:filter_factory
 operator_roles = admin, swiftoperator, Member
 
 [filter:authtoken]
-paste.filter_factory = keystone.middleware.auth_token:filter_factory
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
 # Delaying the auth decision is required to support token-less
 # usage for anonymous referrers ('.r:*').
-delay_auth_decision = 1
+delay_auth_decision = true
 service_port = 5000
 service_host = <%=@ks_auth_host_internal%>
 auth_port = 35357
