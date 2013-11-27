@@ -4,6 +4,32 @@
 #
 include_recipe "python::pip"
 
+service "keystone" do
+  provider Chef::Provider::Service::Upstart
+  action [:enable, :start]
+end
+
+
+%w{ceilometer-agent-central ceilometer-api ceilometer-collector}.each do |sv|
+  service "#{sv}" do
+    provider Chef::Provider::Service::Upstart
+    action [:enable, :start]
+  end
+end
+service "ceilometer-agent-compute" do
+  provider Chef::Provider::Service::Upstart
+  action [:disable, :stop]
+end
+
+%w{swift-account swift-account-replicator swift-container-replicator swift-object-auditor swift-proxy
+swift-account-auditor swift-container  swift-container-updater swift-object-replicator
+swift-account-reaper swift-container-auditor swift-object swift-object-updater}.each do |sv|
+  service "#{sv}" do
+    provider Chef::Provider::Service::Upstart
+    action [:disable, :stop]
+  end
+end
+
 execute "restart rsync" do
   command "service rsync restart"
   user "root"
@@ -47,7 +73,7 @@ end
 end
 
 ks_auth_host_external = node[:keystone][:ks_auth_host_external]
-
+openstack_admin_rc = node[:openstack][:rc_path][:admin]
 template "/root/openstack_rc" do
   source "openstack_rc.erb"
   mode "0644"

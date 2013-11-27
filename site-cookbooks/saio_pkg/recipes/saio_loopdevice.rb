@@ -4,7 +4,7 @@
 #
 
 
-disk_device = node[:swift][:disk]
+disk_device = node[:saio][:loopdevice_disk]
 disk_file = "/srv/swift-disk"
 mnt_dir = "/mnt/#{disk_device}"
 

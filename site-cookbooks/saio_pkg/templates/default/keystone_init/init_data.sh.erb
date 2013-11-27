@@ -1,12 +1,5 @@
 #!/usr/bin/env bash
 
-CONTROLLER_PUBLIC_ADDRESS=<%=@ks_auth_host_external%>
-CONTROLLER_ADMIN_ADDRESS=<%=@ks_auth_host_external%>
-CONTROLLER_INTERNAL_ADDRESS=<%=@ks_auth_host_external%>
-SWIFT_ADDRESS=<%=@swift_proxy_host%>
-ADMIN_USER_PASSWORD=<%=@ks_admin_user_pass%>
-SERVICE_USER_PASSWORD=<%=@ks_service_user_pass%>
-CEILOMETER_ADDRESS=<%=@cm_api_host%>
 
 # Copyright 2013 OpenStack LLC
 #
@@ -34,35 +27,28 @@ CEILOMETER_ADDRESS=<%=@cm_api_host%>
 # Disable creation of endpoints by setting DISABLE_ENDPOINTS environment variable.
 # Use this with the Catalog Templated backend.
 #
-# A EC2-compatible credential is created for the admin user and
-# placed in etc/ec2rc.
 #
-# Tenant               User      Roles
+# Tenant               User       Roles
 # -------------------------------------------------------
-# demo                 admin     admin
-# service              glance    admin
-# service              nova      admin
-# service              ec2       admin
-# service              swift     admin
+# admin                admin      admin
+# service              swift      admin
+# service              ceilometer admin,ResellerAdmin
 
+
+CONTROLLER_PUBLIC_ADDRESS=<%=@ks_auth_host_external%>
+CONTROLLER_ADMIN_ADDRESS=<%=@ks_auth_host_external%>
+CONTROLLER_INTERNAL_ADDRESS=<%=@ks_auth_host_external%>
+ADMIN_USER_PASSWORD=<%=@ks_admin_user_pass%>
+SERVICE_USER_PASSWORD=<%=@ks_service_user_pass%>
+SWIFT_ADDRESS=<%=@swift_proxy_host%>
+CEILOMETER_ADDRESS=<%=@cm_api_host%>
 
 
 CONTROLLER_PUBLIC_ADDRESS=${CONTROLLER_PUBLIC_ADDRESS:-localhost}
 CONTROLLER_ADMIN_ADDRESS=${CONTROLLER_ADMIN_ADDRESS:-localhost}
 CONTROLLER_INTERNAL_ADDRESS=${CONTROLLER_INTERNAL_ADDRESS:-localhost}
 
-TOOLS_DIR=$(cd $(dirname "$0") && pwd)
 KEYSTONE_CONF=${KEYSTONE_CONF:-/etc/keystone/keystone.conf}
-if [[ -r "$KEYSTONE_CONF" ]]; then
-    EC2RC="$(dirname "$KEYSTONE_CONF")/ec2rc"
-elif [[ -r "$TOOLS_DIR/../etc/keystone.conf" ]]; then
-    # assume git checkout
-    KEYSTONE_CONF="$TOOLS_DIR/../etc/keystone.conf"
-    EC2RC="$TOOLS_DIR/../etc/ec2rc"
-else
-    KEYSTONE_CONF=""
-    EC2RC="ec2rc"
-fi
 
 # Extract some info from Keystone's configuration file
 if [[ -r "$KEYSTONE_CONF" ]]; then
@@ -79,16 +65,16 @@ fi
 
 export SERVICE_ENDPOINT=${SERVICE_ENDPOINT:-http://$CONTROLLER_PUBLIC_ADDRESS:${CONFIG_ADMIN_PORT:-35357}/v2.0}
 
+
 function get_id () {
     echo `"$@" | grep ' id ' | awk '{print $4}'`
 }
 
-
 #
 # Default tenant
 #
-DEMO_TENANT=$(get_id keystone tenant-create --name=demo \
-                                            --description "Default Tenant")
+ADMIN_TENANT=$(get_id keystone tenant-create --name=admin \
+                                            --description "Admin Tenant")
 
 ADMIN_USER=$(get_id keystone user-create --name=admin \
                                          --pass=$ADMIN_USER_PASSWORD)
@@ -99,7 +85,7 @@ RESELLER_ADMIN_ROLE=$(get_id keystone role-create --name=ResellerAdmin)
 
 keystone user-role-add --user-id $ADMIN_USER \
                        --role-id $ADMIN_ROLE \
-                       --tenant-id $DEMO_TENANT
+                       --tenant-id $ADMIN_TENANT
 
 #
 # Service tenant
@@ -107,29 +93,9 @@ keystone user-role-add --user-id $ADMIN_USER \
 SERVICE_TENANT=$(get_id keystone tenant-create --name=service \
                                                --description "Service Tenant")
 
-GLANCE_USER=$(get_id keystone user-create --name=glance \
-                                          --pass=$SERVICE_USER_PASSWORD)
-
-keystone user-role-add --user-id $GLANCE_USER \
-                       --role-id $ADMIN_ROLE \
-                       --tenant-id $SERVICE_TENANT
-
-NOVA_USER=$(get_id keystone user-create --name=nova \
-                                        --pass=$SERVICE_USER_PASSWORD \
-                                        --tenant-id $SERVICE_TENANT)
-
-keystone user-role-add --user-id $NOVA_USER \
-                       --role-id $ADMIN_ROLE \
-                       --tenant-id $SERVICE_TENANT
-
-EC2_USER=$(get_id keystone user-create --name=ec2 \
-                                       --pass=$SERVICE_USER_PASSWORD \
-                                       --tenant-id $SERVICE_TENANT)
-
-keystone user-role-add --user-id $EC2_USER \
-                       --role-id $ADMIN_ROLE \
-                       --tenant-id $SERVICE_TENANT
-
+#
+# Swift user
+#
 SWIFT_USER=$(get_id keystone user-create --name=swift \
                                          --pass=$SERVICE_USER_PASSWORD \
                                          --tenant-id $SERVICE_TENANT)
@@ -138,6 +104,9 @@ keystone user-role-add --user-id $SWIFT_USER \
                        --role-id $ADMIN_ROLE \
                        --tenant-id $SERVICE_TENANT
 
+#
+# Ceilometer user
+#
 CEILOMETER_USER=$(get_id keystone user-create --name=ceilometer \
                                          --pass=$SERVICE_USER_PASSWORD \
                                          --tenant-id $SERVICE_TENANT)
@@ -164,61 +133,6 @@ if [[ -z "$DISABLE_ENDPOINTS" ]]; then
         --internalurl "http://$CONTROLLER_INTERNAL_ADDRESS:\$(public_port)s/v2.0"
 fi
 
-#
-# Nova service
-#
-NOVA_SERVICE=$(get_id \
-keystone service-create --name=nova \
-                        --type=compute \
-                        --description="Nova Compute Service")
-if [[ -z "$DISABLE_ENDPOINTS" ]]; then
-    keystone endpoint-create --region RegionOne --service-id $NOVA_SERVICE \
-        --publicurl "http://$CONTROLLER_PUBLIC_ADDRESS:\$(compute_port)s/v1.1/\$(tenant_id)s" \
-        --adminurl "http://$CONTROLLER_ADMIN_ADDRESS:\$(compute_port)s/v1.1/\$(tenant_id)s" \
-        --internalurl "http://$CONTROLLER_INTERNAL_ADDRESS:\$(compute_port)s/v1.1/\$(tenant_id)s"
-fi
-
-#
-# Volume service
-#
-VOLUME_SERVICE=$(get_id \
-keystone service-create --name=volume \
-                        --type=volume \
-                        --description="Nova Volume Service")
-if [[ -z "$DISABLE_ENDPOINTS" ]]; then
-    keystone endpoint-create --region RegionOne --service-id $VOLUME_SERVICE \
-        --publicurl "http://$CONTROLLER_PUBLIC_ADDRESS:8776/v1/\$(tenant_id)s" \
-        --adminurl "http://$CONTROLLER_ADMIN_ADDRESS:8776/v1/\$(tenant_id)s" \
-        --internalurl "http://$CONTROLLER_INTERNAL_ADDRESS:8776/v1/\$(tenant_id)s"
-fi
-
-#
-# Image service
-#
-GLANCE_SERVICE=$(get_id \
-keystone service-create --name=glance \
-                        --type=image \
-                        --description="Glance Image Service")
-if [[ -z "$DISABLE_ENDPOINTS" ]]; then
-    keystone endpoint-create --region RegionOne --service-id $GLANCE_SERVICE \
-        --publicurl "http://$CONTROLLER_PUBLIC_ADDRESS:9292" \
-        --adminurl "http://$CONTROLLER_ADMIN_ADDRESS:9292" \
-        --internalurl "http://$CONTROLLER_INTERNAL_ADDRESS:9292"
-fi
-
-#
-# EC2 service
-#
-EC2_SERVICE=$(get_id \
-keystone service-create --name=ec2 \
-                        --type=ec2 \
-                        --description="EC2 Compatibility Layer")
-if [[ -z "$DISABLE_ENDPOINTS" ]]; then
-    keystone endpoint-create --region RegionOne --service-id $EC2_SERVICE \
-        --publicurl "http://$CONTROLLER_PUBLIC_ADDRESS:8773/services/Cloud" \
-        --adminurl "http://$CONTROLLER_ADMIN_ADDRESS:8773/services/Admin" \
-        --internalurl "http://$CONTROLLER_INTERNAL_ADDRESS:8773/services/Cloud"
-fi
 
 #
 # Swift service
@@ -234,11 +148,6 @@ if [[ -z "$DISABLE_ENDPOINTS" ]]; then
         --internalurl "http://$SWIFT_ADDRESS:8080/v1/AUTH_\$(tenant_id)s"
 fi
 
-# create ec2 creds and parse the secret and access key returned
-RESULT=$(keystone ec2-credentials-create --tenant-id=$SERVICE_TENANT --user-id=$ADMIN_USER)
-ADMIN_ACCESS=`echo "$RESULT" | grep access | awk '{print $4}'`
-ADMIN_SECRET=`echo "$RESULT" | grep secret | awk '{print $4}'`
-
 
 #
 # Ceilometer service
@@ -253,20 +162,3 @@ if [[ -z "$DISABLE_ENDPOINTS" ]]; then
         --adminurl    "http://$CEILOMETER_ADDRESS:8777/" \
         --internalurl "http://$CEILOMETER_ADDRESS:8777/"
 fi
-
-
-
-
-
-
-# create ec2 creds and parse the secret and access key returned
-RESULT=$(keystone ec2-credentials-create --tenant-id=$SERVICE_TENANT --user-id=$ADMIN_USER)
-ADMIN_ACCESS=`echo "$RESULT" | grep access | awk '{print $4}'`
-ADMIN_SECRET=`echo "$RESULT" | grep secret | awk '{print $4}'`
-
-
-# write the secret and access to ec2rc
-cat > $EC2RC <<EOF
-ADMIN_ACCESS=$ADMIN_ACCESS
-ADMIN_SECRET=$ADMIN_SECRET
-EOF

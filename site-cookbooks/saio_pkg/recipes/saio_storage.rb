@@ -1,53 +1,30 @@
 #
-# Cookbook Name:: saio_pkg
+# Cookbook Name:: saio_storage
 # Recipe:: saio_pkg
 #
-include_recipe "python::pip"
-
-%w{apt-file ubuntu-cloud-keyring curl gcc git-core memcached }.each do |pkg|
-  package pkg do
-    action :install
-#    options "--force-yes"
-  end
-end
-
-%w{python-software-properties python-coverage python-dev python-nose python-setuptools python-simplejson python-xattr sqlite3 xfsprogs python-eventlet python-greenlet python-pastedeploy python-netifaces python-pip}.each do |pkg|
-  package pkg do
-    action :install
-  end
-end
-
-python_pip "dnspython" do
-  version "1.11.0"
-  action :install
-end
-
-swift_pkg_version = node[:swift][:pkg_version]
-client_pkg_version = node[:swift][:client_pkg_version]
-
-
-package "swift" do
-  action :install
-#  version "#{swift_pkg_version}"
-end
-
-package "python-swiftclient" do
-  action :install
-#  version "#{client_pkg_version}"
-end
-
-package "swift-proxy" do
-  action :install
-#  version "#{swift_pkg_version}"
-end
-
+include_recipe "saio_pkg::pre_process"
 
 %w{swift-account swift-container swift-object}.each do |pkg|
   package pkg do
     action :install
-#    version  "#{swift_pkg_version}"
   end
 end
+
+template "/etc/rsyncd.conf" do
+  source "rsyncd.conf.erb"
+  mode "0644"
+  owner "root"
+  group "root"
+  variables( {
+               :user => node[:swift][:user],
+               :group => node[:swift][:group]
+             })
+end
+
+cookbook_file "/etc/default/rsync" do
+  source "default-rsync"
+end
+
 
 directory "/srv" do
   owner "root"
@@ -55,12 +32,12 @@ directory "/srv" do
   action :create
 end
 
-use_loopdevice = node[:swift][:loopdevice]
+use_loopdevice = node[:saio][:loopdevice]
 if use_loopdevice
   include_recipe "saio_pkg::saio_loopdevice"
 end
   
-disk = node[:swift][:loopdevice_disk]
+disk = node[:saio][:loopdevice_disk]
 mnt_dir = "/mnt/#{disk}"
 
 for i in 1..4 do
@@ -101,86 +78,6 @@ for i in 1..4 do
     group node[:swift][:group]
     action :create
   end
-end
-
-%w{/etc/swift /var/run/swift}.each do |dir|
-  directory dir do
-    owner node[:swift][:user]
-    group node[:swift][:group]
-    action :create
-  end
-end
-
-directory "/var/log/swift" do
-  owner "syslog"
-  group "adm"
-  mode 0775
-  action :create
-end
-
-directory "/var/log/swift/hourly" do
-  owner "syslog"
-  group "adm"
-  mode 0775
-  action :create
-end
-
-directory "/var/lib/swift/keystone-signing" do
-  owner node[:swift][:user]
-  group node[:swift][:group]
-  mode 0775
-  recursive true
-  action :create
-end
-
-execute "update rsyslog.conf" do
-  command "sed 's/$PrivDropToGroup syslog/$PrivDropToGroup adm/g' </etc/rsyslog.conf > /tmp/rsyslog.conf;cp /tmp/rsyslog.conf /etc/"
-end
-
-
-template "/etc/rsyncd.conf" do
-  source "rsyncd.conf.erb"
-  mode "0644"
-  owner "root"
-  group "root"
-  variables( {
-               :user => node[:swift][:user],
-               :group => node[:swift][:group]
-             })
-end
-
-cookbook_file "/etc/default/rsync" do
-  source "default-rsync"
-end
-
-cookbook_file "/etc/rsyslog.d/10-swift.conf" do
-  source "10-swift.conf"
-end
-
-
-template "/etc/swift/swift.conf" do
-  source "swift.conf.erb"
-  mode "0644"
-  owner node[:swift][:user]
-  group node[:swift][:group]
-  variables( {
-               :hash_path_suffix => node[:swift][:hash_path_suffix]
-             })
-end
-
-template "/etc/swift/proxy-server.conf" do
-  source "proxy-server.conf.erb"
-  mode "0644"
-  owner node[:swift][:user]
-  group node[:swift][:group]
-  variables( {
-               :user => node[:swift][:user],
-               :proxy_host => node[:swift][:proxy_host],
-               :log_level => node[:swift][:log_level],
-               :memcached_ips => node[:swift][:memcached_ips],
-               :ks_auth_host_internal => node[:keystone][:ks_auth_host_internal],
-               :ks_admin_token => node[:keystone][:ks_admin_token]
-             })
 end
 
 
@@ -288,3 +185,9 @@ end
   end
 end
 
+%w{account container object}.each do |type|
+  service "swift-#{type}" do
+    pattern "swift-#{type}"
+    action [ :disable, :stop ]
+  end
+end

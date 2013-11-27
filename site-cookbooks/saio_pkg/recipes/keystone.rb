@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: saio_pkg
-# Recipe:: swift_keystone
+# Recipe:: keystone
 #
 
 package "mysql-server" do
@@ -10,7 +10,6 @@ end
 %w{python-software-properties python-mysqldb}.each do |pkg|
   package pkg do
     action :install
-#    options "--force-yes"
   end
 end
 
@@ -19,18 +18,15 @@ ks_client_pkg_version = node[:keystone][:client_pkg_version]
 
 package "keystone" do
   action :install
-#  version "#{ks_pkg_version}"
 end
 
 package "python-keystoneclient" do
   action :install
-#  version "#{ks_client_pkg_version}"
 end
 
 %w{memcached python-memcache}.each do |pkg|
   package pkg do
     action :install
-#    options "--force-yes"
   end
 end
 
@@ -42,7 +38,7 @@ template "/etc/keystone/keystone.conf" do
   variables( {
                :ks_admin_token => node[:keystone][:ks_admin_token],
                :ks_mysql_pass => node[:keystone][:ks_mysql_pass],
-               :ks_mysql_ip => node[:keystone][:ks_mysql_ip]
+               :ks_mysql_host => node[:keystone][:ks_mysql_host]
              })
 end
 
@@ -52,9 +48,6 @@ template "/etc/keystone/logging.conf" do
   owner "keystone"
   group "keystone"
   variables( {
-               :ks_admin_token => node[:keystone][:ks_admin_token],
-               :ks_mysql_pass => node[:keystone][:ks_mysql_pass],
-               :ks_mysql_ip => node[:keystone][:ks_mysql_ip]
              })
 end
 
