@@ -74,15 +74,29 @@ end
 
 ks_auth_host_external = node[:keystone][:ks_auth_host_external]
 openstack_admin_rc = node[:openstack][:rc_path][:admin]
-template "/root/openstack_rc" do
+template "#{openstack_admin_rc}" do
   source "openstack_rc.erb"
   mode "0644"
-  owner "root"
-  group "root"
+#  owner "root"
+#  group "root"
   variables( {
               :user => "admin",
-              :tenant => "demo",
+              :tenant => "admin",
               :password => node[:keystone][:ks_admin_user_pass],
+              :auth_url => "http://#{ks_auth_host_external}:5000/v2.0"
+            } )
+end
+
+openstack_tester_rc = node[:openstack][:rc_path][:tester]
+template "#{openstack_tester_rc}" do
+  source "openstack_rc.erb"
+  mode "0644"
+#  owner "root"
+#  group "root"
+  variables( {
+              :user => "tester",
+              :tenant => "test",
+              :password => "testing",
               :auth_url => "http://#{ks_auth_host_external}:5000/v2.0"
             } )
 end
