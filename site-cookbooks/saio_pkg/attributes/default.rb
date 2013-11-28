@@ -1,6 +1,8 @@
 default[:mysql][:server_root_password] = "rootpass"
 default[:mysql][:server_debian_password] = "rootpass"
 default[:mysql][:server_repl_password] = "rootpass"
+default[:mysql][:bind_address] = "localhost"
+default[:mysql][:allow_remote_root] = true
 
 default[:openstack][:cloudarchive_repo] = "havana"
 default[:openstack][:rc_path][:admin] = "/home/ubuntu/openstack_admin_rc"

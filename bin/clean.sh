@@ -10,8 +10,9 @@ umount /srv/swift-disk
 rm -rf /srv/
 rm -rf /etc/swift/ /etc/ceilometer /etc/keystone
 rm -rf /var/lib/ceilometer /var/lib/keystone /var/lib/swift
-rm -rf /etc/mysql/ /etc/rabbitmq
+rm -rf /etc/mysql/ /etc/mysql_grants.sql /etc/rabbitmq
 rm -rf /var/lib/mysql /var/lib/rabbitmq
 rm -rf /root/keystone_init
+rm -f /var/cache/local/preseeding/mysql-server.seed
 
 

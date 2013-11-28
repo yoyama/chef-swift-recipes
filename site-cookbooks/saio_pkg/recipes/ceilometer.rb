@@ -3,10 +3,6 @@
 # Recipe:: ceilometer
 #
 
-package "mysql-server" do
-  action :install
-end
-
 %w{python-software-properties python-mysqldb rabbitmq-server rabbitmq-erlang-client}.each do |pkg|
   package pkg do
     action :install

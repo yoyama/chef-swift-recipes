@@ -3,10 +3,6 @@
 # Recipe:: keystone
 #
 
-package "mysql-server" do
-  action :install
-end
-
 %w{python-software-properties python-mysqldb}.each do |pkg|
   package pkg do
     action :install
@@ -87,7 +83,7 @@ end
 include_recipe 'database::mysql'
 
 mysql_connection_info = {
-  :host => "localhost",
+  :host => node[:keystone][:ks_mysql_host],
   :username => 'root',
   :password => node['mysql']['server_root_password']
 }
