@@ -1,6 +1,7 @@
 {
 	"run_list" : [ 
 		   "recipe[mysql::server]", "recipe[python]", 
+		   "recipe[saio_pkg::mysql_postprocess]",
 		   "recipe[saio_pkg::pre_process]",
 		   "recipe[saio_pkg::saio_misc]",
 		   "recipe[saio_pkg::saio_proxy]",

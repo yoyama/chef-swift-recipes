@@ -485,7 +485,7 @@ rabbit_host=<%=@cm_rpc_host%>
 # database (string value)
 #connection=sqlite:////ceilometer/openstack/common/db/$sqlite_db
 #connection=sqlite:////var/lib/ceilometer/ceilometer.sqlite
-connection=mysql://ceilometer:<%= @cm_mysql_pass %>@localhost/ceilometer
+connection=mysql://ceilometer:<%= @cm_mysql_pass %>@<%= @cm_mysql_host %>/ceilometer
 
 # The SQLAlchemy connection string used to connect to the
 # slave database (string value)

@@ -98,6 +98,7 @@ mysql_database_user "keystone" do
   password node[:keystone][:ks_mysql_pass]
   database_name "keystone"
   privileges [:all]
+  host '%'
   action [:create, :grant]
 end
 
