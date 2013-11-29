@@ -185,9 +185,3 @@ end
   end
 end
 
-%w{account container object}.each do |type|
-  service "swift-#{type}" do
-    pattern "swift-#{type}"
-    action [ :disable, :stop ]
-  end
-end

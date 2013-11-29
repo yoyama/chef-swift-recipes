@@ -7,12 +7,12 @@ include_recipe "python::pip"
 %w{apt-file ubuntu-cloud-keyring curl gcc git-core }.each do |pkg|
   package pkg do
     action :install
-#    options "--force-yes"
   end
 end
 
 %w{python-software-properties python-setuptools python-coverage python-dev python-nose python-simplejson python-xattr python-eventlet python-greenlet python-pastedeploy python-netifaces python-pip sqlite3 xfsprogs }.each do |pkg|
-  package pkg do
+  package "pre:#{pkg}" do
+    package_name pkg
     action :install
   end
 end

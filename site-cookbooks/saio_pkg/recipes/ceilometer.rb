@@ -4,9 +4,9 @@
 #
 
 %w{python-software-properties python-mysqldb rabbitmq-server rabbitmq-erlang-client}.each do |pkg|
-  package pkg do
+  package "cm:#{pkg}" do
+    package_name pkg
     action :install
-#    options "--force-yes"
   end
 end
 
@@ -62,9 +62,21 @@ end
 
 mysql_database_user "ceilometer" do
   connection mysql_connection_info
+  username "ceilometer"
   password node[:ceilometer][:cm_mysql_pass]
   database_name "ceilometer"
   privileges [:all]
+  host '%'
+  action [:create, :grant]
+end
+
+mysql_database_user "ceilometer_2" do
+  connection mysql_connection_info
+  username "ceilometer"
+  password node[:ceilometer][:cm_mysql_pass]
+  database_name "ceilometer"
+  privileges [:all]
+  host 'localhost'
   action [:create, :grant]
 end
 
@@ -76,18 +88,11 @@ cm_client_pkg_version = node[:ceilometer][:client_pkg_version]
 %w{python-ceilometer ceilometer-common ceilometer-collector ceilometer-api ceilometer-agent-compute ceilometer-agent-central  }.each do |pkg|
   package pkg do
     action :install
-#    version "#{cm_pkg_version}"
     options "-o Dpkg::Options::=\"--force-confold\" --force-yes "
   end
 end
 
 package "python-ceilometerclient" do
   action :install
-#  version "#{cm_client_pkg_version}"
 end
 
-execute "restart rabbitmq-server" do
-  command "service rabbitmq-server restart"
-  user "root"
-  group "root"
-end

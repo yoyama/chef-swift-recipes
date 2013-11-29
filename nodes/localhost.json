@@ -8,6 +8,6 @@
 		   "recipe[saio_pkg::saio_storage]",
 		   "recipe[saio_pkg::keystone]", 
 		   "recipe[saio_pkg::ceilometer]",
-		   "recipe[saio_pkg::postprocess]"
+		   "recipe[saio_pkg::post_process]"
 	]
 }

@@ -4,7 +4,8 @@
 #
 
 %w{python-software-properties python-mysqldb}.each do |pkg|
-  package pkg do
+  package "ks:#{pkg}" do
+    package_name pkg
     action :install
   end
 end
@@ -21,7 +22,8 @@ package "python-keystoneclient" do
 end
 
 %w{memcached python-memcache}.each do |pkg|
-  package pkg do
+  package "ks:#{pkg}" do
+    package_name pkg
     action :install
   end
 end
@@ -95,10 +97,21 @@ end
 
 mysql_database_user "keystone" do
   connection mysql_connection_info
+  username "keystone"
   password node[:keystone][:ks_mysql_pass]
   database_name "keystone"
   privileges [:all]
   host '%'
+  action [:create, :grant]
+end
+
+mysql_database_user "keystone_2" do
+  connection mysql_connection_info
+  username "keystone"
+  password node[:keystone][:ks_mysql_pass]
+  database_name "keystone"
+  privileges [:all]
+  host 'localhost'
   action [:create, :grant]
 end
 
@@ -107,6 +120,7 @@ bash "init_keystone" do
   cwd "/root/keystone_init"
   code <<-EOF
 service keystone restart
+sleep 5
 keystone-manage db_sync
   EOF
 end

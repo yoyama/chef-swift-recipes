@@ -16,16 +16,6 @@ end
   end
 end
 
-template "/etc/swift/swift.conf" do
-  source "swift.conf.erb"
-  mode "0644"
-  owner node[:swift][:user]
-  group node[:swift][:group]
-  variables( {
-               :hash_path_suffix => node[:swift][:hash_path_suffix]
-             })
-end
-
 %w{memcached }.each do |pkg|
   package pkg do
     action :install
@@ -38,45 +28,6 @@ end
 
 package "swift-proxy" do
   action :install
-end
-
-
-%w{/etc/swift /var/run/swift}.each do |dir|
-  directory dir do
-    owner node[:swift][:user]
-    group node[:swift][:group]
-    action :create
-  end
-end
-
-directory "/var/log/swift" do
-  owner "syslog"
-  group "adm"
-  mode 0775
-  action :create
-end
-
-directory "/var/log/swift/hourly" do
-  owner "syslog"
-  group "adm"
-  mode 0775
-  action :create
-end
-
-directory "/var/lib/swift/keystone-signing" do
-  owner node[:swift][:user]
-  group node[:swift][:group]
-  mode 0775
-  recursive true
-  action :create
-end
-
-execute "update rsyslog.conf" do
-  command "sed 's/$PrivDropToGroup syslog/$PrivDropToGroup adm/g' </etc/rsyslog.conf > /tmp/rsyslog.conf;cp /tmp/rsyslog.conf /etc/"
-end
-
-cookbook_file "/etc/rsyslog.d/10-swift.conf" do
-  source "10-swift.conf"
 end
 
 template "/etc/swift/swift.conf" do
@@ -102,10 +53,6 @@ template "/etc/swift/proxy-server.conf" do
                :ks_auth_host_internal => node[:keystone][:ks_auth_host_internal],
                :ks_admin_token => node[:keystone][:ks_admin_token]
              })
-end
-
-service "swift-proxy" do
-  action [ :disable, :stop ]
 end
 
 

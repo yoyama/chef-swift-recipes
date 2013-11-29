@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: saio_pkg
-# Recipe:: postprocess
+# Recipe:: post_process
 #
 include_recipe "python::pip"
 

@@ -4,6 +4,7 @@
 #
 include_recipe "saio_pkg::pre_process"
 
+
 directory "/var/log/swift" do
   owner "syslog"
   group "adm"
