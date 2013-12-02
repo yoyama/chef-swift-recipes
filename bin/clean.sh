@@ -17,5 +17,8 @@ rm -rf /root/keystone_init
 service rsync stop
 rm -f /etc/rsyncd.conf /etc/memcached.conf
 rm -f /var/cache/local/preseeding/mysql-server.seed
+userdel swift
+userdel keystone
+userdel ceilometer
 
 
