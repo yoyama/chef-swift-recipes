@@ -6,8 +6,30 @@
 		   "recipe[saio_pkg::saio_misc]",
 		   "recipe[saio_pkg::saio_proxy]",
 		   "recipe[saio_pkg::saio_storage]",
+		   "recipe[saio_pkg::saio_obj_expire]",
 		   "recipe[saio_pkg::keystone]", 
 		   "recipe[saio_pkg::ceilometer]",
 		   "recipe[saio_pkg::post_process]"
 	]
+        ,
+	"mysql" : {
+		"bind_address": "localhost"
+	} 
+	,
+	"swift" : {
+		"proxy_host": "localhost",
+		"memcached_ips": "localhost"
+        }
+	,
+	"keystone" : {
+		"ks_auth_host_internal": "localhost",
+		"ks_auth_host_external": "localhost",
+		"ks_mysql_host": "localhost"
+        }
+	,
+	"ceilometer" : {
+		"cm_api_host": "localhost",
+		"cm_rpc_host": "localhost",
+		"cm_mysql_host": "localhost"
+        }
 }

@@ -55,6 +55,15 @@ template "/etc/swift/proxy-server.conf" do
              })
 end
 
+template "/etc/memcached.conf" do
+  source "memcached.conf.erb"
+  mode "0644"
+  owner "root"
+  group "root"
+  variables( {
+             })
+end
+
 directory "/var/lib/swift/keystone-signing" do
   owner node[:swift][:user]
   group node[:swift][:group]
