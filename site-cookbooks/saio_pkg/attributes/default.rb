@@ -18,6 +18,7 @@ default[:swift][:hash_path_suffix]= "TestTestTest"
 default[:swift][:log_level]= "DEBUG"
 default[:swift][:proxy_host]= "localhost"
 default[:swift][:memcached_ips]= "localhost"
+default[:swift][:storage_local_net_ip]= "localhost"
 #default[:swift][:pkg_version] = "1.9.0-0ubuntu1~cloud0"
 #default[:swift][:client_pkg_version] = "1:1.5.0-0ubuntu1~cloud0"
 

@@ -1,0 +1,26 @@
+[DEFAULT]
+user = <%= @user %>
+bind_ip = <%= @storage_local_net_ip %>
+bind_port = 6001
+workers = 2
+log_facility = <%= @log_facility %>
+recon_cache_path = /var/cache/swift
+eventlet_debug = true
+
+[pipeline:main]
+pipeline = recon container-server
+
+[app:container-server]
+use = egg:swift#container
+allow_versions = true
+
+[filter:recon]
+use = egg:swift#recon
+
+[container-replicator]
+
+[container-updater]
+
+[container-auditor]
+
+[container-sync]
