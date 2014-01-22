@@ -1,0 +1,14 @@
+{
+	"run_list" : [ 
+		   "recipe[python]", 
+		   "recipe[saio_pkg::pre_process]",
+		   "recipe[saio_pkg::saio_misc]",
+		   "recipe[saio_pkg::swift_storage]",
+		   "recipe[saio_pkg::swift_ring_dist]"
+	]
+	,
+	"swift" : {
+		"storage_local_net_ip": "localhost"
+        }
+}
+

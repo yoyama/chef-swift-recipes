@@ -1,6 +1,9 @@
+site-cookbooks/saio_pkg/files/default/ring/*.builder
+site-cookbooks/saio_pkg/files/default/ring/*.ring.gz
 /cookbooks
 /nodes/*json
 !/nodes/localhost.json
+!/nodes/storage.json
 /Cheffile.lock
 /tmp
 *.bak
