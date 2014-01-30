@@ -1,5 +1,6 @@
 site-cookbooks/saio_pkg/files/default/ring/*.builder
 site-cookbooks/saio_pkg/files/default/ring/*.ring.gz
+site-cookbooks/saio_pkg/files/default/ring/backups
 /cookbooks
 /nodes/*json
 !/nodes/localhost.json

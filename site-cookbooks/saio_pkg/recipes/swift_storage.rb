@@ -27,7 +27,7 @@ end
 
 
 template "/etc/rsyncd.conf" do
-  source "rsyncd.conf.erb"
+  source "storage/rsyncd.conf.erb"
   mode "0644"
   owner "root"
   group "root"
