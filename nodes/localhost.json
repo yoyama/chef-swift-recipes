@@ -1,5 +1,6 @@
 {
 	"run_list" : [ 
+		   "recipe[ntp]",
 		   "recipe[mysql::server]", "recipe[python]", 
 		   "recipe[saio_pkg::mysql_postprocess]",
 		   "recipe[saio_pkg::pre_process]",
@@ -11,6 +12,10 @@
 		   "recipe[saio_pkg::ceilometer]",
 		   "recipe[saio_pkg::post_process]"
 	]
+        ,
+	"ntp": {
+    		"servers": ["ntp.jst.mfeed.ad.jp"]
+        }
         ,
 	"mysql" : {
 		"bind_address": "localhost"
